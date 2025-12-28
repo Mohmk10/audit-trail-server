@@ -28,6 +28,7 @@
         <module>audit-trail-detection</module>
         <module>audit-trail-admin</module>
         <module>audit-trail-integration</module>
+        <module>audit-trail-sdk-java</module>
     </modules>
 
     <properties>
