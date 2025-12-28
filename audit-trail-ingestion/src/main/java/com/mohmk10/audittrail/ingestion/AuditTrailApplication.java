@@ -11,10 +11,17 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         "com.mohmk10.audittrail.core",
         "com.mohmk10.audittrail.storage",
         "com.mohmk10.audittrail.search",
+        "com.mohmk10.audittrail.reporting",
         "com.mohmk10.audittrail.ingestion"
 })
-@EntityScan(basePackages = "com.mohmk10.audittrail.storage.adapter.out.persistence.entity")
-@EnableJpaRepositories(basePackages = "com.mohmk10.audittrail.storage.adapter.out.persistence.repository")
+@EntityScan(basePackages = {
+        "com.mohmk10.audittrail.storage.adapter.out.persistence.entity",
+        "com.mohmk10.audittrail.reporting.adapter.out.persistence"
+})
+@EnableJpaRepositories(basePackages = {
+        "com.mohmk10.audittrail.storage.adapter.out.persistence.repository",
+        "com.mohmk10.audittrail.reporting.adapter.out.persistence"
+})
 public class AuditTrailApplication {
 
     public static void main(String[] args) {

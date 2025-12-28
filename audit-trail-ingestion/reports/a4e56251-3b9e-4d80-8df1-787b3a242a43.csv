@@ -1,0 +1,2 @@
+﻿"ID","Timestamp","Actor ID","Actor Type","Actor Name","Actor IP","Action Type","Action Description","Action Category","Resource ID","Resource Type","Resource Name","Correlation ID","Session ID","Source","Tenant ID","Hash"
+"6b8e6722-a2eb-44b2-a138-8f472edf2610","2025-12-28 10:16:40","user-001","USER","John Doe","","CREATE","Created a new document","","doc-123","DOCUMENT","Important Report","134e7b06-16b9-486b-8a8d-41382542cb16","","web-app","tenant-001","c6eed8cdec73ba795be4d7f36e7e994ac1ea7ccb07208f822e9a949a0184ba82"

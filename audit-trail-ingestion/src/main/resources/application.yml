@@ -28,3 +28,10 @@ ingestion:
     maxSize: 1000
   validation:
     strictMode: false
+
+reporting:
+  storage:
+    path: ./reports
+    max-size-mb: 100
+  expiration:
+    days: 30

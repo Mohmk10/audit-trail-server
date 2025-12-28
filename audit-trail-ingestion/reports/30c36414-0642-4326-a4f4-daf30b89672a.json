@@ -1,0 +1,168 @@
+{
+  "summary" : {
+    "byActor" : {
+      "user-001" : 1,
+      "user-1" : 2,
+      "user-2" : 1
+    },
+    "firstEventAt" : "2025-12-28T10:16:40.346Z",
+    "lastEventAt" : "2025-12-28T11:23:57.750Z",
+    "totalEvents" : 4,
+    "byResourceType" : {
+      "DOCUMENT" : 3,
+      "FILE" : 1
+    },
+    "byActionType" : {
+      "DELETE" : 1,
+      "CREATE" : 2,
+      "UPDATE" : 1
+    }
+  },
+  "metadata" : {
+    "reportId" : "30c36414-0642-4326-a4f4-daf30b89672a",
+    "templateName" : "Audit Report",
+    "templateDescription" : "Complete audit trail report with all events in the specified period, grouped by date and actor",
+    "name" : "JSON Export",
+    "format" : "JSON",
+    "tenantId" : "tenant-001",
+    "generatedAt" : "2025-12-28T11:24:25.275375Z",
+    "type" : "AUDIT"
+  },
+  "events" : [ {
+    "id" : "7c7d7c6b-d59e-484a-82d3-39d1b344f015",
+    "timestamp" : "2025-12-28T11:23:57.750Z",
+    "actor" : {
+      "id" : "user-1",
+      "type" : "USER",
+      "name" : "Alice",
+      "ip" : null,
+      "userAgent" : null,
+      "attributes" : null
+    },
+    "action" : {
+      "type" : "DELETE",
+      "description" : "Deleted file",
+      "category" : null
+    },
+    "resource" : {
+      "id" : "file-1",
+      "type" : "FILE",
+      "name" : "temp.txt",
+      "before" : null,
+      "after" : null
+    },
+    "metadata" : {
+      "source" : "app",
+      "tenantId" : "tenant-001",
+      "correlationId" : "17ba42b7-00fc-4609-8508-f3d54a6d2833",
+      "sessionId" : null,
+      "tags" : null,
+      "extra" : null
+    },
+    "previousHash" : null,
+    "hash" : "c78c6903ba0afc56424efb06076f4ffdac471f9f7fb70468122d8c0b82a2f769",
+    "signature" : null
+  }, {
+    "id" : "634b6a2b-3439-43ee-bd8f-76cdce965f0e",
+    "timestamp" : "2025-12-28T11:23:57.671Z",
+    "actor" : {
+      "id" : "user-2",
+      "type" : "USER",
+      "name" : "Bob",
+      "ip" : null,
+      "userAgent" : null,
+      "attributes" : null
+    },
+    "action" : {
+      "type" : "UPDATE",
+      "description" : "Updated document",
+      "category" : null
+    },
+    "resource" : {
+      "id" : "doc-1",
+      "type" : "DOCUMENT",
+      "name" : "Q4 Report",
+      "before" : null,
+      "after" : null
+    },
+    "metadata" : {
+      "source" : "app",
+      "tenantId" : "tenant-001",
+      "correlationId" : "5cc5feb2-4f04-4140-a972-fd30c134bfca",
+      "sessionId" : null,
+      "tags" : null,
+      "extra" : null
+    },
+    "previousHash" : null,
+    "hash" : "258c89da605a38106fe971a5c2b4193707f839ab96d472cf7ff82853dc8bbdb8",
+    "signature" : null
+  }, {
+    "id" : "a0d185f3-2643-4ce5-a267-09ab876fcbc5",
+    "timestamp" : "2025-12-28T11:23:49.812Z",
+    "actor" : {
+      "id" : "user-1",
+      "type" : "USER",
+      "name" : "Alice",
+      "ip" : null,
+      "userAgent" : null,
+      "attributes" : null
+    },
+    "action" : {
+      "type" : "CREATE",
+      "description" : "Created document",
+      "category" : null
+    },
+    "resource" : {
+      "id" : "doc-1",
+      "type" : "DOCUMENT",
+      "name" : "Q4 Report",
+      "before" : null,
+      "after" : null
+    },
+    "metadata" : {
+      "source" : "app",
+      "tenantId" : "tenant-001",
+      "correlationId" : "14d8fbf9-6e04-40f2-81f9-a536541021ea",
+      "sessionId" : null,
+      "tags" : null,
+      "extra" : null
+    },
+    "previousHash" : null,
+    "hash" : "08b7e267b2776b7c17e9fa1c46f0753cad55ce8b447ec9f192248036fc195ae5",
+    "signature" : null
+  }, {
+    "id" : "6b8e6722-a2eb-44b2-a138-8f472edf2610",
+    "timestamp" : "2025-12-28T10:16:40.346Z",
+    "actor" : {
+      "id" : "user-001",
+      "type" : "USER",
+      "name" : "John Doe",
+      "ip" : null,
+      "userAgent" : null,
+      "attributes" : null
+    },
+    "action" : {
+      "type" : "CREATE",
+      "description" : "Created a new document",
+      "category" : null
+    },
+    "resource" : {
+      "id" : "doc-123",
+      "type" : "DOCUMENT",
+      "name" : "Important Report",
+      "before" : null,
+      "after" : null
+    },
+    "metadata" : {
+      "source" : "web-app",
+      "tenantId" : "tenant-001",
+      "correlationId" : "134e7b06-16b9-486b-8a8d-41382542cb16",
+      "sessionId" : null,
+      "tags" : null,
+      "extra" : null
+    },
+    "previousHash" : null,
+    "hash" : "c6eed8cdec73ba795be4d7f36e7e994ac1ea7ccb07208f822e9a949a0184ba82",
+    "signature" : null
+  } ]
+}
