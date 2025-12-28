@@ -35,6 +35,10 @@
             <artifactId>audit-trail-detection</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.mohmk10.audittrail</groupId>
+            <artifactId>audit-trail-admin</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>

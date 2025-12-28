@@ -1,0 +1,7 @@
+admin:
+  api-key:
+    prefix: "atk_"
+    length: 32
+    default-expiration-days: 365
+  tenant:
+    default-plan: FREE

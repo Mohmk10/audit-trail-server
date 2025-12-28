@@ -1,0 +1,54 @@
+package com.mohmk10.audittrail.admin.domain;
+
+public enum AdminAction {
+    // User actions
+    USER_CREATED,
+    USER_UPDATED,
+    USER_DELETED,
+    USER_ACTIVATED,
+    USER_DEACTIVATED,
+    USER_LOCKED,
+    USER_UNLOCKED,
+    USER_PASSWORD_CHANGED,
+    USER_ROLE_CHANGED,
+    USER_LOGIN,
+    USER_LOGIN_FAILED,
+    USER_LOGOUT,
+
+    // Tenant actions
+    TENANT_CREATED,
+    TENANT_UPDATED,
+    TENANT_SUSPENDED,
+    TENANT_ACTIVATED,
+    TENANT_PLAN_CHANGED,
+    TENANT_SETTINGS_CHANGED,
+
+    // Source actions
+    SOURCE_CREATED,
+    SOURCE_UPDATED,
+    SOURCE_DELETED,
+    SOURCE_ACTIVATED,
+    SOURCE_DEACTIVATED,
+
+    // API Key actions
+    API_KEY_CREATED,
+    API_KEY_REVOKED,
+    API_KEY_ROTATED,
+
+    // Rule actions
+    RULE_CREATED,
+    RULE_UPDATED,
+    RULE_DELETED,
+    RULE_ENABLED,
+    RULE_DISABLED,
+
+    // Report actions
+    REPORT_GENERATED,
+    REPORT_SCHEDULED,
+    REPORT_EXPORTED,
+
+    // System actions
+    SYSTEM_SETTINGS_CHANGED,
+    MAINTENANCE_MODE_ENABLED,
+    MAINTENANCE_MODE_DISABLED
+}
