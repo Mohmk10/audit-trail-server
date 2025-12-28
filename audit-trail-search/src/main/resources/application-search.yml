@@ -1,0 +1,9 @@
+spring:
+  elasticsearch:
+    uris: http://localhost:9200
+
+search:
+  index:
+    name: events
+    shards: 1
+    replicas: 0

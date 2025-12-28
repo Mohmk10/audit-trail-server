@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @ComponentScan(basePackages = {
         "com.mohmk10.audittrail.core",
         "com.mohmk10.audittrail.storage",
+        "com.mohmk10.audittrail.search",
         "com.mohmk10.audittrail.ingestion"
 })
 @EntityScan(basePackages = "com.mohmk10.audittrail.storage.adapter.out.persistence.entity")
