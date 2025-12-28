@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/audit_trail
+    username: ${DB_USERNAME:audit_user}
+    password: ${DB_PASSWORD:audit_password}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+audit-trail:
+  storage:
+    chain-verification-enabled: true
+    signature-enabled: true
