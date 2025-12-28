@@ -1,6 +1,7 @@
 package com.mohmk10.audittrail.ingestion.service;
 
 import com.mohmk10.audittrail.core.domain.Event;
+import com.mohmk10.audittrail.core.event.EventStoredEvent;
 import com.mohmk10.audittrail.core.exception.InvalidEventException;
 import com.mohmk10.audittrail.ingestion.adapter.in.rest.dto.BatchEventRequest;
 import com.mohmk10.audittrail.ingestion.adapter.in.rest.dto.BatchEventResponse;
@@ -12,6 +13,7 @@ import com.mohmk10.audittrail.search.service.EventIndexingService;
 import com.mohmk10.audittrail.storage.service.ImmutableStorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
@@ -27,18 +29,21 @@ public class EventIngestionServiceImpl implements EventIngestionService {
     private final ImmutableStorageService storageService;
     private final EventRequestMapper mapper;
     private final EventIndexingService indexingService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public EventIngestionServiceImpl(
             EventValidationService validationService,
             EventEnrichmentService enrichmentService,
             ImmutableStorageService storageService,
             EventRequestMapper mapper,
-            EventIndexingService indexingService) {
+            EventIndexingService indexingService,
+            ApplicationEventPublisher eventPublisher) {
         this.validationService = validationService;
         this.enrichmentService = enrichmentService;
         this.storageService = storageService;
         this.mapper = mapper;
         this.indexingService = indexingService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -105,6 +110,7 @@ public class EventIngestionServiceImpl implements EventIngestionService {
     private void indexEvent(Event event) {
         try {
             indexingService.index(event);
+            eventPublisher.publishEvent(new EventStoredEvent(this, event));
         } catch (Exception e) {
             log.error("Failed to index event {}: {}", event.id(), e.getMessage());
         }
@@ -113,6 +119,9 @@ public class EventIngestionServiceImpl implements EventIngestionService {
     private void indexEvents(List<Event> events) {
         try {
             indexingService.indexBatch(events);
+            for (Event event : events) {
+                eventPublisher.publishEvent(new EventStoredEvent(this, event));
+            }
         } catch (Exception e) {
             log.error("Failed to index {} events: {}", events.size(), e.getMessage());
         }

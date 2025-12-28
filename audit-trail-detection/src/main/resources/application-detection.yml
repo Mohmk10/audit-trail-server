@@ -1,0 +1,15 @@
+detection:
+  async:
+    enabled: true
+  notification:
+    email:
+      from: alerts@audittrail.local
+    slack:
+      enabled: false
+    webhook:
+      timeout-ms: 5000
+
+spring:
+  mail:
+    host: localhost
+    port: 1025

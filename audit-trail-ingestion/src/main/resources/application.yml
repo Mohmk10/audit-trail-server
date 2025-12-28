@@ -19,6 +19,9 @@ spring:
     locations: classpath:db/migration
   elasticsearch:
     uris: http://localhost:9200
+  mail:
+    host: localhost
+    port: 1025
 
 server:
   port: 8080
