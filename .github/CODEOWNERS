@@ -1,0 +1,29 @@
+# Default owner
+* @mohmk10
+
+# Backend modules
+/audit-trail-core/ @mohmk10
+/audit-trail-storage/ @mohmk10
+/audit-trail-ingestion/ @mohmk10
+/audit-trail-search/ @mohmk10
+/audit-trail-reporting/ @mohmk10
+/audit-trail-detection/ @mohmk10
+/audit-trail-admin/ @mohmk10
+/audit-trail-integration/ @mohmk10
+/audit-trail-app/ @mohmk10
+
+# SDKs
+/audit-trail-sdk-java/ @mohmk10
+/audit-trail-sdk-js/ @mohmk10
+/audit-trail-sdk-python/ @mohmk10
+/audit-trail-sdk-go/ @mohmk10
+
+# Infrastructure
+/docker/ @mohmk10
+/helm/ @mohmk10
+/.github/ @mohmk10
+/scripts/ @mohmk10
+
+# Configuration
+Makefile @mohmk10
+pom.xml @mohmk10

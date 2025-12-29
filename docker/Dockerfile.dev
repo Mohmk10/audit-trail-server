@@ -1,0 +1,39 @@
+# ============================================
+# Development Dockerfile
+# ============================================
+FROM eclipse-temurin:21-jdk-alpine
+
+LABEL org.opencontainers.image.title="Audit Trail Server (Dev)"
+LABEL org.opencontainers.image.description="Development image with hot reload"
+
+WORKDIR /app
+
+# Install Maven and useful tools
+RUN apk add --no-cache maven curl bash
+
+# Copy Maven files for dependency caching
+COPY pom.xml .
+COPY audit-trail-core/pom.xml audit-trail-core/
+COPY audit-trail-storage/pom.xml audit-trail-storage/
+COPY audit-trail-ingestion/pom.xml audit-trail-ingestion/
+COPY audit-trail-search/pom.xml audit-trail-search/
+COPY audit-trail-reporting/pom.xml audit-trail-reporting/
+COPY audit-trail-detection/pom.xml audit-trail-detection/
+COPY audit-trail-admin/pom.xml audit-trail-admin/
+COPY audit-trail-integration/pom.xml audit-trail-integration/
+COPY audit-trail-app/pom.xml audit-trail-app/
+
+# Download dependencies (cached layer)
+RUN mvn dependency:go-offline -B || true
+
+# Expose ports (HTTP and debug)
+EXPOSE 8080 5005
+
+# JVM options for development
+ENV JAVA_OPTS="-XX:+UseContainerSupport \
+    -XX:MaxRAMPercentage=75.0 \
+    -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+
+# Run with spring-boot:run for hot reload
+CMD ["mvn", "spring-boot:run", "-pl", "audit-trail-app", \
+     "-Dspring-boot.run.jvmArguments=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"]

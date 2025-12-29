@@ -1,0 +1,49 @@
+apiVersion: v2
+name: audit-trail
+description: Universal Audit Logging System - Production-ready audit trail for compliance and security
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+
+keywords:
+  - audit
+  - logging
+  - compliance
+  - security
+  - observability
+  - siem
+
+maintainers:
+  - name: mohmk10
+    email: contact@mohmk10.com
+
+home: https://github.com/mohmk10/audit-trail-server
+sources:
+  - https://github.com/mohmk10/audit-trail-server
+
+icon: https://raw.githubusercontent.com/mohmk10/audit-trail-server/main/docs/logo.png
+
+dependencies:
+  - name: postgresql
+    version: "13.2.24"
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled
+
+  - name: elasticsearch
+    version: "19.13.14"
+    repository: https://charts.bitnami.com/bitnami
+    condition: elasticsearch.enabled
+
+  - name: redis
+    version: "18.6.1"
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled
+
+  - name: kafka
+    version: "26.6.2"
+    repository: https://charts.bitnami.com/bitnami
+    condition: kafka.enabled
+
+annotations:
+  artifacthub.io/license: MIT
+  artifacthub.io/category: logging-and-tracing

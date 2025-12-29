@@ -1,0 +1,56 @@
+name: Release SDK Python
+
+on:
+  push:
+    tags:
+      - 'sdk-python-v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release'
+        required: true
+
+jobs:
+  release:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Extract Version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/sdk-python-v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Install Build Tools
+        run: pip install build twine
+
+      - name: Update Version
+        run: |
+          cd audit-trail-sdk-python
+          sed -i "s/version = .*/version = \"${{ steps.version.outputs.version }}\"/" pyproject.toml
+
+      - name: Build
+        run: |
+          cd audit-trail-sdk-python
+          python -m build
+
+      - name: Publish
+        run: |
+          cd audit-trail-sdk-python
+          twine upload dist/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}

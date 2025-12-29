@@ -1,0 +1,185 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # Audit Trail Server
+  # ============================================
+  audit-trail-server:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: mohmk10/audit-trail-server:latest
+    container_name: audit-trail-server
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/audittrail
+      - SPRING_DATASOURCE_USERNAME=audittrail
+      - SPRING_DATASOURCE_PASSWORD=audittrail
+      - SPRING_ELASTICSEARCH_URIS=http://elasticsearch:9200
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_DATA_REDIS_HOST=redis
+      - JAVA_OPTS=-Xmx512m
+    depends_on:
+      postgres:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      redis:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - audit-trail-network
+    volumes:
+      - audit-trail-reports:/app/reports
+      - audit-trail-logs:/app/logs
+
+  # ============================================
+  # PostgreSQL
+  # ============================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: audit-trail-postgres
+    environment:
+      - POSTGRES_DB=audittrail
+      - POSTGRES_USER=audittrail
+      - POSTGRES_PASSWORD=audittrail
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U audittrail -d audittrail"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - audit-trail-network
+
+  # ============================================
+  # Elasticsearch
+  # ============================================
+  elasticsearch:
+    image: elasticsearch:8.11.0
+    container_name: audit-trail-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - audit-trail-network
+
+  # ============================================
+  # Redis
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: audit-trail-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - audit-trail-network
+
+  # ============================================
+  # Zookeeper
+  # ============================================
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: audit-trail-zookeeper
+    environment:
+      - ZOOKEEPER_CLIENT_PORT=2181
+      - ZOOKEEPER_TICK_TIME=2000
+    networks:
+      - audit-trail-network
+
+  # ============================================
+  # Kafka
+  # ============================================
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: audit-trail-kafka
+    ports:
+      - "9092:9092"
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+    depends_on:
+      - zookeeper
+    networks:
+      - audit-trail-network
+
+  # ============================================
+  # Kibana (Optional - for Elasticsearch visualization)
+  # ============================================
+  kibana:
+    image: kibana:8.11.0
+    container_name: audit-trail-kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - audit-trail-network
+    profiles:
+      - monitoring
+
+  # ============================================
+  # Kafka UI (Optional - for Kafka management)
+  # ============================================
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: audit-trail-kafka-ui
+    ports:
+      - "8081:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+    depends_on:
+      - kafka
+    networks:
+      - audit-trail-network
+    profiles:
+      - monitoring
+
+networks:
+  audit-trail-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  elasticsearch-data:
+  redis-data:
+  audit-trail-reports:
+  audit-trail-logs:
