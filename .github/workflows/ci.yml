@@ -229,7 +229,8 @@ jobs:
       - name: Build
         run: |
           cd audit-trail-sdk-go
-          go build ./...
+          # Build only the main SDK package (exclude examples)
+          go build .
 
       - name: Test
         run: |

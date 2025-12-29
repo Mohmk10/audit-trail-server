@@ -70,13 +70,13 @@ func main() {
 		audittrail.NewEvent(
 			audittrail.NewUserActor("user-1", "Alice"),
 			audittrail.ReadAction("Viewed report"),
-			audittrail.NewResource("report", "rpt-001", "Q4 Report"),
+			audittrail.NewResource("rpt-001", "report", "Q4 Report"),
 			audittrail.NewEventMetadata("reports", "tenant-001"),
 		),
 		audittrail.NewEvent(
 			audittrail.NewUserActor("user-2", "Bob"),
 			audittrail.DeleteAction("Deleted old file"),
-			audittrail.NewResource("file-002", "FILE", "old-data.csv"),
+			audittrail.NewResource("file-002", "file", "old-data.csv"),
 			audittrail.NewEventMetadata("files", "tenant-001"),
 		),
 	}
