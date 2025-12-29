@@ -18,8 +18,7 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -27,6 +26,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.21'
+          cache: false
 
       - name: Extract Version
         id: version
@@ -37,30 +37,23 @@ jobs:
             VERSION="${GITHUB_REF#refs/tags/sdk-go-v}"
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Version: $VERSION"
 
-      - name: Verify Go Module
+      - name: Verify Module
         run: |
           cd audit-trail-sdk-go
           go mod tidy
-          # Build only the main SDK package (exclude examples)
           go build .
-          # Run tests (excluding examples)
-          go test -v ./... -count=1 2>&1 | head -100 || true
 
       - name: Create Go Module Tag
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-
           TAG="audit-trail-sdk-go/v${{ steps.version.outputs.version }}"
-
           if git rev-parse "$TAG" >/dev/null 2>&1; then
             echo "Tag $TAG already exists"
           else
             git tag -a "$TAG" -m "SDK Go v${{ steps.version.outputs.version }}"
             git push origin "$TAG"
-            echo "Created and pushed tag: $TAG"
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

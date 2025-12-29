@@ -11,51 +11,29 @@ on:
         required: true
 
 jobs:
-  release:
+  publish:
     name: Publish to PyPI
     runs-on: ubuntu-latest
-    environment: pypi
     permissions:
       id-token: write
-      contents: read
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Extract Version
-        id: version
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            VERSION="${{ github.event.inputs.version }}"
-          else
-            VERSION="${GITHUB_REF#refs/tags/sdk-python-v}"
-          fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Version: $VERSION"
+      - name: Install build tools
+        run: pip install build twine
 
-      - name: Install Build Tools
-        run: pip install build
-
-      - name: Update Version in pyproject.toml
-        run: |
-          cd audit-trail-sdk-python
-          sed -i 's/version = ".*"/version = "${{ steps.version.outputs.version }}"/' pyproject.toml
-          cat pyproject.toml | grep version
-
-      - name: Build Package
+      - name: Build
         run: |
           cd audit-trail-sdk-python
           python -m build
-          ls -la dist/
 
-      - name: Publish to PyPI (Trusted Publisher)
+      - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: audit-trail-sdk-python/dist/
-          verbose: true

@@ -11,24 +11,18 @@ on:
         required: true
 
 jobs:
-  release:
+  publish:
     name: Publish to npm
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write  # Required for npm provenance
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
-          cache: 'npm'
-          cache-dependency-path: audit-trail-sdk-js/package-lock.json
 
       - name: Extract Version
         id: version
@@ -39,38 +33,17 @@ jobs:
             VERSION="${GITHUB_REF#refs/tags/sdk-js-v}"
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Version: $VERSION"
 
-      - name: Install Dependencies
+      - name: Install and Build
         run: |
           cd audit-trail-sdk-js
           npm ci
-
-      - name: Update Version
-        run: |
-          cd audit-trail-sdk-js
-          CURRENT_VERSION=$(node -p "require('./package.json').version")
-          if [ "$CURRENT_VERSION" != "${{ steps.version.outputs.version }}" ]; then
-            npm version ${{ steps.version.outputs.version }} --no-git-tag-version
-          else
-            echo "Version already set to ${{ steps.version.outputs.version }}"
-          fi
-
-      - name: Build
-        run: |
-          cd audit-trail-sdk-js
+          npm version ${{ steps.version.outputs.version }} --no-git-tag-version --allow-same-version
           npm run build
 
-      - name: Publish to npm
+      - name: Publish
         run: |
           cd audit-trail-sdk-js
-          # Note: NPM_TOKEN must be an "Automation" token (not "Publish") if 2FA is enabled
-          # Provenance requires public repo, so we skip it for private repos
           npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Verify Publication
-        run: |
-          sleep 10
-          npm view @mohmk10/audit-trail-sdk@${{ steps.version.outputs.version }} || echo "Package may take a few minutes to appear"
