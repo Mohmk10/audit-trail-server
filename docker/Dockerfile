@@ -18,8 +18,6 @@ COPY audit-trail-reporting/pom.xml audit-trail-reporting/
 COPY audit-trail-detection/pom.xml audit-trail-detection/
 COPY audit-trail-admin/pom.xml audit-trail-admin/
 COPY audit-trail-integration/pom.xml audit-trail-integration/
-COPY audit-trail-app/pom.xml audit-trail-app/
-
 # Download dependencies (cached layer)
 RUN mvn dependency:go-offline -B || true
 
@@ -27,8 +25,8 @@ RUN mvn dependency:go-offline -B || true
 COPY . .
 
 # Build the application
-RUN mvn clean package -DskipTests -B && \
-    mv audit-trail-app/target/*.jar app.jar
+RUN mvn clean package -DskipTests -B -pl audit-trail-ingestion -am && \
+    mv audit-trail-ingestion/target/*.jar app.jar
 
 # ============================================
 # Runtime Stage

@@ -62,10 +62,10 @@ jobs:
           </settings>
           EOF
 
-      - name: Set Version and Build
+      - name: Build
         run: |
           cd audit-trail-sdk-java
-          mvn versions:set -DnewVersion=${{ steps.version.outputs.version }} -B
+          # Version is already set in pom.xml (inherited from parent)
           mvn clean package -DskipTests -B
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}

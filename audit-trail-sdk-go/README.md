@@ -148,16 +148,17 @@ result, err := client.QuickSearch(ctx, "document", "tenant-001", 0, 10)
 
 ## Types d'actions
 
-| Constante | Valeur |
-|-----------|--------|
-| `ActionTypeCreate` | "CREATE" |
-| `ActionTypeRead` | "READ" |
-| `ActionTypeUpdate` | "UPDATE" |
-| `ActionTypeDelete` | "DELETE" |
-| `ActionTypeLogin` | "LOGIN" |
-| `ActionTypeLogout` | "LOGOUT" |
-| `ActionTypeExport` | "EXPORT" |
-| `ActionTypeImport` | "IMPORT" |
+Les actions utilisent des chaînes de caractères. Utilisez les fonctions factory :
+
+| Fonction | Type |
+|----------|------|
+| `CreateAction(desc)` | "CREATE" |
+| `ReadAction(desc)` | "READ" |
+| `UpdateAction(desc)` | "UPDATE" |
+| `DeleteAction(desc)` | "DELETE" |
+| `LoginAction()` | "LOGIN" |
+| `LogoutAction()` | "LOGOUT" |
+| `NewAction(type, desc, cat)` | Custom |
 
 ## Gestion des erreurs
 

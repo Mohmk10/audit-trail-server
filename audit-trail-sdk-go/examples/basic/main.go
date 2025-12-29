@@ -44,7 +44,7 @@ func main() {
 			Name("Payment Service").
 			Build()).
 		Action(audittrail.NewActionBuilder().
-			Type(audittrail.ActionTypeUpdate).
+			Type("UPDATE").
 			Description("Updated payment status").
 			Build()).
 		Resource(audittrail.NewResourceBuilder().
@@ -76,7 +76,7 @@ func main() {
 		audittrail.NewEvent(
 			audittrail.NewUserActor("user-2", "Bob"),
 			audittrail.DeleteAction("Deleted old file"),
-			audittrail.FileResource("file-002", "old-data.csv"),
+			audittrail.NewResource("file-002", "FILE", "old-data.csv"),
 			audittrail.NewEventMetadata("files", "tenant-001"),
 		),
 	}
@@ -92,7 +92,7 @@ func main() {
 	criteria := audittrail.SearchCriteria{
 		TenantID:   "tenant-001",
 		ActorID:    "user-123",
-		ActionType: string(audittrail.ActionTypeCreate),
+		ActionType: "CREATE",
 		Page:       0,
 		Size:       10,
 	}
@@ -101,7 +101,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to search: %v", err)
 	}
-	fmt.Printf("Found %d events (total: %d)\n", len(searchResult.Items), searchResult.TotalElements)
+	fmt.Printf("Found %d events (total: %d)\n", len(searchResult.Items), searchResult.TotalCount)
 
 	// Example 5: Get event by ID
 	retrieved, err := client.GetByID(ctx, response.ID)

@@ -47,7 +47,7 @@ jobs:
       - name: Build JAR
         run: |
           mvn versions:set -DnewVersion=${{ steps.version.outputs.version }} -B
-          mvn clean package -DskipTests -B -pl audit-trail-app -am
+          mvn clean package -DskipTests -B -pl audit-trail-ingestion -am
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -87,4 +87,4 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            audit-trail-app/target/*.jar
+            audit-trail-ingestion/target/*.jar
