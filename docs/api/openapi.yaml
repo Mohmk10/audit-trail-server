@@ -1,0 +1,1556 @@
+openapi: 3.0.3
+info:
+  title: Audit Trail API
+  description: |
+    API REST pour la gestion des evenements d'audit.
+
+    ## Authentication
+
+    Toutes les requetes doivent inclure une cle API dans le header:
+    ```
+    X-API-Key: your-api-key
+    ```
+
+    ## Rate Limiting
+
+    - Default: 1000 requetes/minute
+    - Batch: 100 requetes/minute
+
+    ## Pagination
+
+    Les endpoints qui retournent des listes supportent la pagination:
+    - `page`: Numero de page (0-indexed)
+    - `size`: Nombre d'elements par page (max: 100)
+
+  version: 1.0.0
+  contact:
+    name: Audit Trail Support
+    email: support@audit-trail.io
+    url: https://github.com/Mohmk10/audit-trail-server
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.audit-trail.io/api/v1
+    description: Production
+  - url: https://staging-api.audit-trail.io/api/v1
+    description: Staging
+  - url: http://localhost:8080/api/v1
+    description: Local development
+
+tags:
+  - name: Events
+    description: Ingestion et recuperation d'evenements
+  - name: Search
+    description: Recherche et agregations
+  - name: Reports
+    description: Generation de rapports
+  - name: Rules
+    description: Regles de detection
+  - name: Alerts
+    description: Gestion des alertes
+  - name: Webhooks
+    description: Webhooks et integrations
+  - name: Admin
+    description: Administration (tenants, sources, API keys)
+
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /events:
+    post:
+      tags:
+        - Events
+      summary: Creer un evenement
+      description: Ingere un nouvel evenement d'audit
+      operationId: createEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventRequest'
+            example:
+              actor:
+                id: "user-123"
+                type: USER
+                name: "John Doe"
+                ip: "192.168.1.100"
+              action:
+                type: CREATE
+                description: "Created document"
+                category: DOCUMENT
+              resource:
+                id: "doc-456"
+                type: DOCUMENT
+                name: "Q4 Report"
+              metadata:
+                source: "web-app"
+                tenantId: "tenant-001"
+                correlationId: "req-789"
+      responses:
+        '201':
+          description: Evenement cree avec succes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /events/batch:
+    post:
+      tags:
+        - Events
+      summary: Creer des evenements en batch
+      description: Ingere plusieurs evenements en une seule requete (max 1000)
+      operationId: createEventsBatch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchEventRequest'
+      responses:
+        '201':
+          description: Batch traite
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchEventResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /events/{id}:
+    get:
+      tags:
+        - Events
+      summary: Recuperer un evenement
+      description: Recupere un evenement par son ID
+      operationId: getEvent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID de l'evenement
+      responses:
+        '200':
+          description: Evenement trouve
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /search:
+    post:
+      tags:
+        - Search
+      summary: Recherche avancee
+      description: Recherche d'evenements avec filtres multiples
+      operationId: search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: Resultats de recherche
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+
+  /search/quick:
+    get:
+      tags:
+        - Search
+      summary: Recherche rapide
+      description: Recherche full-text simple
+      operationId: quickSearch
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Terme de recherche
+        - name: tenantId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: Resultats de recherche
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+
+  /search/by-actor/{actorId}:
+    get:
+      tags:
+        - Search
+      summary: Recherche par acteur
+      description: Tous les evenements d'un acteur
+      operationId: searchByActor
+      parameters:
+        - name: actorId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: tenantId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: fromDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: toDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Resultats de recherche
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+
+  /search/by-resource/{resourceId}:
+    get:
+      tags:
+        - Search
+      summary: Recherche par ressource
+      description: Tous les evenements sur une ressource
+      operationId: searchByResource
+      parameters:
+        - name: resourceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: tenantId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Resultats de recherche
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+
+  /search/timeline:
+    get:
+      tags:
+        - Search
+      summary: Timeline
+      description: Evenements groupes par periode
+      operationId: getTimeline
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: fromDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: toDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: interval
+          in: query
+          schema:
+            type: string
+            enum: [hour, day, week, month]
+            default: day
+      responses:
+        '200':
+          description: Timeline
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelineResponse'
+
+  /search/aggregations:
+    post:
+      tags:
+        - Search
+      summary: Agregations
+      description: Statistiques agregees
+      operationId: getAggregations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AggregationRequest'
+      responses:
+        '200':
+          description: Agregations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AggregationResponse'
+
+  /reports:
+    post:
+      tags:
+        - Reports
+      summary: Generer un rapport
+      description: Demande la generation d'un rapport
+      operationId: createReport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportRequest'
+      responses:
+        '202':
+          description: Rapport en cours de generation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResponse'
+
+    get:
+      tags:
+        - Reports
+      summary: Lister les rapports
+      description: Liste tous les rapports d'un tenant
+      operationId: listReports
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, GENERATING, COMPLETED, FAILED]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Liste des rapports
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ReportResponse'
+                  totalCount:
+                    type: integer
+
+  /reports/{id}:
+    get:
+      tags:
+        - Reports
+      summary: Recuperer un rapport
+      operationId: getReport
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Rapport trouve
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /reports/{id}/download:
+    get:
+      tags:
+        - Reports
+      summary: Telecharger un rapport
+      operationId: downloadReport
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Fichier du rapport
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+            text/csv:
+              schema:
+                type: string
+                format: binary
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                type: string
+                format: binary
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /rules:
+    post:
+      tags:
+        - Rules
+      summary: Creer une regle
+      operationId: createRule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleRequest'
+      responses:
+        '201':
+          description: Regle creee
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleResponse'
+
+    get:
+      tags:
+        - Rules
+      summary: Lister les regles
+      operationId: listRules
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: enabled
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Liste des regles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RuleResponse'
+
+  /rules/{id}:
+    get:
+      tags:
+        - Rules
+      summary: Recuperer une regle
+      operationId: getRule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Regle trouvee
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleResponse'
+
+    put:
+      tags:
+        - Rules
+      summary: Mettre a jour une regle
+      operationId: updateRule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleRequest'
+      responses:
+        '200':
+          description: Regle mise a jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleResponse'
+
+    delete:
+      tags:
+        - Rules
+      summary: Supprimer une regle
+      operationId: deleteRule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Regle supprimee
+
+  /alerts:
+    get:
+      tags:
+        - Alerts
+      summary: Lister les alertes
+      operationId: listAlerts
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [NEW, ACKNOWLEDGED, RESOLVED, DISMISSED]
+        - name: severity
+          in: query
+          schema:
+            type: string
+            enum: [LOW, MEDIUM, HIGH, CRITICAL]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Liste des alertes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertListResponse'
+
+  /alerts/{id}:
+    get:
+      tags:
+        - Alerts
+      summary: Recuperer une alerte
+      operationId: getAlert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Alerte trouvee
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertResponse'
+
+  /alerts/{id}/acknowledge:
+    post:
+      tags:
+        - Alerts
+      summary: Acquitter une alerte
+      operationId: acknowledgeAlert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Alerte acquittee
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertResponse'
+
+  /alerts/{id}/resolve:
+    post:
+      tags:
+        - Alerts
+      summary: Resoudre une alerte
+      operationId: resolveAlert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notes:
+                  type: string
+                resolution:
+                  type: string
+      responses:
+        '200':
+          description: Alerte resolue
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertResponse'
+
+  /webhooks:
+    post:
+      tags:
+        - Webhooks
+      summary: Creer un webhook
+      operationId: createWebhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookRequest'
+      responses:
+        '201':
+          description: Webhook cree
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookResponse'
+
+    get:
+      tags:
+        - Webhooks
+      summary: Lister les webhooks
+      operationId: listWebhooks
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Liste des webhooks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WebhookResponse'
+
+  /webhooks/{id}:
+    delete:
+      tags:
+        - Webhooks
+      summary: Supprimer un webhook
+      operationId: deleteWebhook
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Webhook supprime
+
+  /admin/tenants:
+    post:
+      tags:
+        - Admin
+      summary: Creer un tenant
+      operationId: createTenant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenantRequest'
+      responses:
+        '201':
+          description: Tenant cree
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantResponse'
+
+    get:
+      tags:
+        - Admin
+      summary: Lister les tenants
+      operationId: listTenants
+      responses:
+        '200':
+          description: Liste des tenants
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TenantResponse'
+
+  /admin/sources:
+    post:
+      tags:
+        - Admin
+      summary: Creer une source
+      operationId: createSource
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SourceRequest'
+      responses:
+        '201':
+          description: Source creee
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceResponse'
+
+  /admin/api-keys:
+    post:
+      tags:
+        - Admin
+      summary: Creer une cle API
+      operationId: createApiKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiKeyRequest'
+      responses:
+        '201':
+          description: Cle API creee
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyResponse'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  schemas:
+    Actor:
+      type: object
+      required:
+        - id
+        - type
+      properties:
+        id:
+          type: string
+          description: Identifiant unique de l'acteur
+          example: "user-123"
+        type:
+          type: string
+          enum: [USER, SYSTEM, SERVICE]
+          description: Type d'acteur
+        name:
+          type: string
+          description: Nom affichable
+          example: "John Doe"
+        ip:
+          type: string
+          description: Adresse IP
+          example: "192.168.1.100"
+        userAgent:
+          type: string
+          description: User-Agent du client
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+          description: Attributs personnalises
+
+    Action:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          description: Type d'action
+          example: "CREATE"
+        description:
+          type: string
+          description: Description de l'action
+          example: "Created document"
+        category:
+          type: string
+          description: Categorie
+          example: "DOCUMENT"
+
+    Resource:
+      type: object
+      required:
+        - id
+        - type
+      properties:
+        id:
+          type: string
+          description: Identifiant de la ressource
+          example: "doc-456"
+        type:
+          type: string
+          description: Type de ressource
+          example: "DOCUMENT"
+        name:
+          type: string
+          description: Nom affichable
+          example: "Q4 Report"
+        before:
+          type: object
+          description: Etat avant modification
+        after:
+          type: object
+          description: Etat apres modification
+
+    EventMetadata:
+      type: object
+      required:
+        - source
+        - tenantId
+      properties:
+        source:
+          type: string
+          description: Source de l'evenement
+          example: "web-app"
+        tenantId:
+          type: string
+          description: Identifiant du tenant
+          example: "tenant-001"
+        correlationId:
+          type: string
+          description: ID de correlation pour le tracing
+        sessionId:
+          type: string
+          description: ID de session
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+
+    EventRequest:
+      type: object
+      required:
+        - actor
+        - action
+        - resource
+        - metadata
+      properties:
+        actor:
+          $ref: '#/components/schemas/Actor'
+        action:
+          $ref: '#/components/schemas/Action'
+        resource:
+          $ref: '#/components/schemas/Resource'
+        metadata:
+          $ref: '#/components/schemas/EventMetadata'
+
+    EventResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        actor:
+          $ref: '#/components/schemas/Actor'
+        action:
+          $ref: '#/components/schemas/Action'
+        resource:
+          $ref: '#/components/schemas/Resource'
+        metadata:
+          $ref: '#/components/schemas/EventMetadata'
+        previousHash:
+          type: string
+        hash:
+          type: string
+        signature:
+          type: string
+        status:
+          type: string
+          enum: [STORED, INDEXED]
+
+    BatchEventRequest:
+      type: object
+      required:
+        - events
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventRequest'
+          maxItems: 1000
+
+    BatchEventResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+        succeeded:
+          type: integer
+        failed:
+          type: integer
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventResponse'
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              index:
+                type: integer
+              message:
+                type: string
+              violations:
+                type: array
+                items:
+                  type: string
+
+    SearchRequest:
+      type: object
+      required:
+        - tenantId
+      properties:
+        tenantId:
+          type: string
+        actorId:
+          type: string
+        actorType:
+          type: string
+        actionType:
+          type: string
+        resourceId:
+          type: string
+        resourceType:
+          type: string
+        source:
+          type: string
+        fromDate:
+          type: string
+          format: date-time
+        toDate:
+          type: string
+          format: date-time
+        query:
+          type: string
+          description: Recherche full-text
+        page:
+          type: integer
+          default: 0
+        size:
+          type: integer
+          default: 20
+          maximum: 100
+
+    SearchResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventResponse'
+        totalCount:
+          type: integer
+        page:
+          type: integer
+        size:
+          type: integer
+        totalPages:
+          type: integer
+
+    TimelineResponse:
+      type: object
+      properties:
+        tenantId:
+          type: string
+        fromDate:
+          type: string
+          format: date-time
+        toDate:
+          type: string
+          format: date-time
+        interval:
+          type: string
+        buckets:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              count:
+                type: integer
+              events:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventResponse'
+
+    AggregationRequest:
+      type: object
+      required:
+        - tenantId
+        - groupBy
+      properties:
+        tenantId:
+          type: string
+        fromDate:
+          type: string
+          format: date-time
+        toDate:
+          type: string
+          format: date-time
+        groupBy:
+          type: array
+          items:
+            type: string
+
+    AggregationResponse:
+      type: object
+      properties:
+        aggregations:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: integer
+        totalCount:
+          type: integer
+
+    ReportRequest:
+      type: object
+      required:
+        - tenantId
+        - name
+        - format
+      properties:
+        tenantId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [ACTIVITY, COMPLIANCE, AUDIT]
+          default: ACTIVITY
+        format:
+          type: string
+          enum: [PDF, CSV, EXCEL, JSON]
+        parameters:
+          type: object
+          properties:
+            fromDate:
+              type: string
+              format: date-time
+            toDate:
+              type: string
+              format: date-time
+            filters:
+              type: object
+
+    ReportResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        format:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, GENERATING, COMPLETED, FAILED]
+        filePath:
+          type: string
+        fileSize:
+          type: integer
+          format: int64
+        generatedAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    RuleRequest:
+      type: object
+      required:
+        - tenantId
+        - name
+        - type
+        - condition
+      properties:
+        tenantId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [THRESHOLD, PATTERN, ANOMALY, SEQUENCE, TIME_BASED]
+        condition:
+          type: object
+          properties:
+            field:
+              type: string
+            operator:
+              type: string
+              enum: [EQ, NE, GT, GTE, LT, LTE, CONTAINS, MATCHES, IN]
+            value:
+              type: string
+            threshold:
+              type: integer
+            window:
+              type: string
+        actions:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum: [EMAIL, WEBHOOK, SLACK, LOG]
+              config:
+                type: object
+        enabled:
+          type: boolean
+          default: true
+        priority:
+          type: integer
+          default: 5
+
+    RuleResponse:
+      allOf:
+        - $ref: '#/components/schemas/RuleRequest'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+
+    AlertResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+        ruleId:
+          type: string
+          format: uuid
+        ruleName:
+          type: string
+        severity:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, CRITICAL]
+        status:
+          type: string
+          enum: [NEW, ACKNOWLEDGED, RESOLVED, DISMISSED]
+        title:
+          type: string
+        description:
+          type: string
+        eventIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        acknowledgedBy:
+          type: string
+        acknowledgedAt:
+          type: string
+          format: date-time
+        resolvedBy:
+          type: string
+        resolvedAt:
+          type: string
+          format: date-time
+        notes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    AlertListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertResponse'
+        totalCount:
+          type: integer
+        page:
+          type: integer
+        size:
+          type: integer
+
+    WebhookRequest:
+      type: object
+      required:
+        - tenantId
+        - name
+        - url
+        - events
+      properties:
+        tenantId:
+          type: string
+        name:
+          type: string
+        url:
+          type: string
+          format: uri
+        secret:
+          type: string
+        events:
+          type: array
+          items:
+            type: string
+        enabled:
+          type: boolean
+          default: true
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+
+    WebhookResponse:
+      allOf:
+        - $ref: '#/components/schemas/WebhookRequest'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            lastDeliveryAt:
+              type: string
+              format: date-time
+            lastDeliveryStatus:
+              type: integer
+            createdAt:
+              type: string
+              format: date-time
+
+    TenantRequest:
+      type: object
+      required:
+        - code
+        - name
+      properties:
+        code:
+          type: string
+          pattern: '^[a-z0-9-]+$'
+        name:
+          type: string
+        description:
+          type: string
+        retentionDays:
+          type: integer
+          default: 365
+        maxEventsPerDay:
+          type: integer
+          format: int64
+
+    TenantResponse:
+      allOf:
+        - $ref: '#/components/schemas/TenantRequest'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            enabled:
+              type: boolean
+            createdAt:
+              type: string
+              format: date-time
+
+    SourceRequest:
+      type: object
+      required:
+        - tenantId
+        - code
+        - name
+      properties:
+        tenantId:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [WEB, MOBILE, API, BATCH, IOT]
+
+    SourceResponse:
+      allOf:
+        - $ref: '#/components/schemas/SourceRequest'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            enabled:
+              type: boolean
+            createdAt:
+              type: string
+              format: date-time
+
+    ApiKeyRequest:
+      type: object
+      required:
+        - tenantId
+        - name
+      properties:
+        tenantId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+        rateLimit:
+          type: integer
+          default: 1000
+        expiresAt:
+          type: string
+          format: date-time
+
+    ApiKeyResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        keyId:
+          type: string
+        key:
+          type: string
+          description: Only returned on creation
+        tenantId:
+          type: string
+        name:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+        rateLimit:
+          type: integer
+        enabled:
+          type: boolean
+        expiresAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      properties:
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        path:
+          type: string
+
+    ValidationError:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          properties:
+            violations:
+              type: array
+              items:
+                type: string
+
+  responses:
+    BadRequest:
+      description: Requete invalide
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+
+    Unauthorized:
+      description: Non authentifie
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Forbidden:
+      description: Non autorise
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: Ressource non trouvee
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    TooManyRequests:
+      description: Rate limit atteint
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Secondes avant nouvelle tentative
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

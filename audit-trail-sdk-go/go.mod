@@ -1,4 +1,4 @@
-module github.com/mohmk10/audit-trail-server/audit-trail-sdk-go
+module github.com/Mohmk10/audit-trail-server/audit-trail-sdk-go
 
 go 1.21
 

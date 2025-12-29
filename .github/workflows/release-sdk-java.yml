@@ -25,11 +25,11 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: 'maven'
-          server-id: ossrh
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
-          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
-          gpg-passphrase: GPG_PASSPHRASE
+
+      - name: Import GPG Key
+        run: |
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
+          gpg --list-secret-keys --keyid-format LONG
 
       - name: Extract Version
         id: version
@@ -40,13 +40,117 @@ jobs:
             VERSION="${GITHUB_REF#refs/tags/sdk-java-v}"
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
 
-      - name: Publish
+      - name: Configure Maven for Signing
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml << 'EOF'
+          <settings>
+            <profiles>
+              <profile>
+                <id>gpg</id>
+                <properties>
+                  <gpg.executable>gpg</gpg.executable>
+                  <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
+                </properties>
+              </profile>
+            </profiles>
+            <activeProfiles>
+              <activeProfile>gpg</activeProfile>
+            </activeProfiles>
+          </settings>
+          EOF
+
+      - name: Set Version and Build
         run: |
           cd audit-trail-sdk-java
-          mvn versions:set -DnewVersion=${{ steps.version.outputs.version }}
-          mvn clean deploy -P release -DskipTests -B
+          mvn versions:set -DnewVersion=${{ steps.version.outputs.version }} -B
+          mvn clean package -DskipTests -B
         env:
-          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Generate Sources and Javadoc JARs
+        run: |
+          cd audit-trail-sdk-java
+          mvn source:jar javadoc:jar -B
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Sign Artifacts
+        run: |
+          cd audit-trail-sdk-java/target
+          for file in *.jar *.pom 2>/dev/null; do
+            if [ -f "$file" ]; then
+              gpg --batch --yes --pinentry-mode loopback \
+                  --passphrase "${{ secrets.GPG_PASSPHRASE }}" \
+                  -ab "$file"
+            fi
+          done
+          ls -la
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Create Bundle for Central Portal
+        run: |
+          cd audit-trail-sdk-java
+          VERSION=${{ steps.version.outputs.version }}
+
+          mkdir -p bundle
+
+          # Copy main artifacts
+          cp target/audit-trail-sdk-java-${VERSION}.jar bundle/
+          cp target/audit-trail-sdk-java-${VERSION}-sources.jar bundle/ || true
+          cp target/audit-trail-sdk-java-${VERSION}-javadoc.jar bundle/ || true
+          cp pom.xml bundle/audit-trail-sdk-java-${VERSION}.pom
+
+          # Copy signatures
+          cp target/*.asc bundle/ || true
+
+          # Sign the POM if not signed
+          if [ ! -f "bundle/audit-trail-sdk-java-${VERSION}.pom.asc" ]; then
+            gpg --batch --yes --pinentry-mode loopback \
+                --passphrase "${{ secrets.GPG_PASSPHRASE }}" \
+                -ab "bundle/audit-trail-sdk-java-${VERSION}.pom"
+          fi
+
+          # Create checksums
+          cd bundle
+          for file in *.jar *.pom; do
+            if [ -f "$file" ]; then
+              md5sum "$file" | cut -d' ' -f1 > "${file}.md5"
+              sha1sum "$file" | cut -d' ' -f1 > "${file}.sha1"
+            fi
+          done
+
+          # Create bundle zip
+          zip -r ../bundle.zip .
+
+          echo "Bundle contents:"
+          ls -la
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Upload to Maven Central Portal
+        run: |
+          cd audit-trail-sdk-java
+
+          echo "Uploading to Maven Central Portal..."
+
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+            "https://central.sonatype.com/api/v1/publisher/upload" \
+            -H "Authorization: Bearer ${{ secrets.SONATYPE_TOKEN_BASE64 }}" \
+            -F "bundle=@bundle.zip")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Response: $BODY"
+
+          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+            echo "Upload successful!"
+          else
+            echo "Upload failed!"
+            exit 1
+          fi

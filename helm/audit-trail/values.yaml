@@ -4,7 +4,7 @@
 replicaCount: 2
 
 image:
-  repository: mohmk10/audit-trail-server
+  repository: devmohmk/audit-trail-server
   tag: ""  # Defaults to Chart.appVersion
   pullPolicy: IfNotPresent
 

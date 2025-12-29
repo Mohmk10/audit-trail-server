@@ -27,7 +27,7 @@ log_error() {
 }
 
 # Default values
-IMAGE_NAME="mohmk10/audit-trail-server"
+IMAGE_NAME="devmohmk/audit-trail-server"
 VERSION="latest"
 PUSH=false
 PLATFORMS="linux/amd64"

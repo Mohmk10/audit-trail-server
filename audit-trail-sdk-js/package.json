@@ -18,7 +18,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mohmk10/audit-trail-server"
+    "url": "https://github.com/Mohmk10/audit-trail-server"
   },
   "devDependencies": {
     "tsup": "^8.0.1",

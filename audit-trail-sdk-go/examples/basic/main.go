@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	audittrail "github.com/mohmk10/audit-trail-server/audit-trail-sdk-go"
+	audittrail "github.com/Mohmk10/audit-trail-server/audit-trail-sdk-go"
 )
 
 func main() {

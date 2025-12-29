@@ -36,17 +36,31 @@ jobs:
             VERSION="${GITHUB_REF#refs/tags/sdk-js-v}"
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
 
-      - name: Install & Build
+      - name: Install Dependencies
         run: |
           cd audit-trail-sdk-js
           npm ci
+
+      - name: Update Version
+        run: |
+          cd audit-trail-sdk-js
           npm version ${{ steps.version.outputs.version }} --no-git-tag-version
+
+      - name: Build
+        run: |
+          cd audit-trail-sdk-js
           npm run build
 
-      - name: Publish
+      - name: Publish to npm
         run: |
           cd audit-trail-sdk-js
           npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Verify Publication
+        run: |
+          sleep 10
+          npm view @mohmk10/audit-trail-sdk@${{ steps.version.outputs.version }} || echo "Package may take a few minutes to appear"

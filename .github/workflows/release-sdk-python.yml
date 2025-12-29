@@ -14,6 +14,10 @@ jobs:
   release:
     name: Publish to PyPI
     runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - name: Checkout
@@ -33,24 +37,25 @@ jobs:
             VERSION="${GITHUB_REF#refs/tags/sdk-python-v}"
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
 
       - name: Install Build Tools
-        run: pip install build twine
+        run: pip install build
 
-      - name: Update Version
+      - name: Update Version in pyproject.toml
         run: |
           cd audit-trail-sdk-python
-          sed -i "s/version = .*/version = \"${{ steps.version.outputs.version }}\"/" pyproject.toml
+          sed -i 's/version = ".*"/version = "${{ steps.version.outputs.version }}"/' pyproject.toml
+          cat pyproject.toml | grep version
 
-      - name: Build
+      - name: Build Package
         run: |
           cd audit-trail-sdk-python
           python -m build
+          ls -la dist/
 
-      - name: Publish
-        run: |
-          cd audit-trail-sdk-python
-          twine upload dist/*
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+      - name: Publish to PyPI (Trusted Publisher)
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: audit-trail-sdk-python/dist/
+          verbose: true

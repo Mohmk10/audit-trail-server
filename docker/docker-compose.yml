@@ -8,7 +8,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    image: mohmk10/audit-trail-server:latest
+    image: devmohmk/audit-trail-server:latest
     container_name: audit-trail-server
     ports:
       - "8080:8080"

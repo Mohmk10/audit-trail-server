@@ -269,7 +269,7 @@ jobs:
           context: .
           file: docker/Dockerfile
           push: false
-          tags: mohmk10/audit-trail-server:test
+          tags: devmohmk/audit-trail-server:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

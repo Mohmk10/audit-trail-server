@@ -3,8 +3,8 @@
 # ============================================
 # Variables
 # ============================================
-VERSION ?= 1.0.0-SNAPSHOT
-DOCKER_REPO ?= mohmk10/audit-trail-server
+VERSION ?= 1.0.0
+DOCKER_REPO ?= devmohmk/audit-trail-server
 HELM_RELEASE ?= audit-trail
 
 # ============================================

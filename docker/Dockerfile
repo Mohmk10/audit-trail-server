@@ -37,8 +37,8 @@ FROM eclipse-temurin:21-jre-alpine
 
 LABEL org.opencontainers.image.title="Audit Trail Server"
 LABEL org.opencontainers.image.description="Universal audit logging system"
-LABEL org.opencontainers.image.vendor="mohmk10"
-LABEL org.opencontainers.image.source="https://github.com/mohmk10/audit-trail-server"
+LABEL org.opencontainers.image.vendor="devmohmk"
+LABEL org.opencontainers.image.source="https://github.com/Mohmk10/audit-trail-server"
 LABEL org.opencontainers.image.licenses="MIT"
 
 # Security: Run as non-root user

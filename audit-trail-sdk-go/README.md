@@ -5,7 +5,7 @@ SDK Go pour le système d'Audit Trail Universel.
 ## Installation
 
 ```bash
-go get github.com/mohmk10/audit-trail-server/audit-trail-sdk-go
+go get github.com/Mohmk10/audit-trail-server/audit-trail-sdk-go
 ```
 
 ## Utilisation rapide

@@ -38,9 +38,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/mohmk10/audit-trail-server"
-Documentation = "https://github.com/mohmk10/audit-trail-server#readme"
-Repository = "https://github.com/mohmk10/audit-trail-server"
+Homepage = "https://github.com/Mohmk10/audit-trail-server"
+Documentation = "https://github.com/Mohmk10/audit-trail-server#readme"
+Repository = "https://github.com/Mohmk10/audit-trail-server"
 
 [tool.hatch.build.targets.sdist]
 include = ["/src"]

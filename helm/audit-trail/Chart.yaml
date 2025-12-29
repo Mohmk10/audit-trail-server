@@ -17,11 +17,11 @@ maintainers:
   - name: mohmk10
     email: contact@mohmk10.com
 
-home: https://github.com/mohmk10/audit-trail-server
+home: https://github.com/Mohmk10/audit-trail-server
 sources:
-  - https://github.com/mohmk10/audit-trail-server
+  - https://github.com/Mohmk10/audit-trail-server
 
-icon: https://raw.githubusercontent.com/mohmk10/audit-trail-server/main/docs/logo.png
+icon: https://raw.githubusercontent.com/Mohmk10/audit-trail-server/main/docs/logo.png
 
 dependencies:
   - name: postgresql
