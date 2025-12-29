@@ -14,6 +14,9 @@ jobs:
   release:
     name: Publish to npm
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # Required for npm provenance
 
     steps:
       - name: Checkout
@@ -61,7 +64,8 @@ jobs:
       - name: Publish to npm
         run: |
           cd audit-trail-sdk-js
-          npm publish --access public
+          # Note: NPM_TOKEN must be an "Automation" token (not "Publish") if 2FA is enabled
+          npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
