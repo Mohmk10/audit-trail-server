@@ -1,7 +1,7 @@
 # ============================================
 # Build Stage
 # ============================================
-FROM eclipse-temurin:21-jdk-alpine AS builder
+FROM eclipse-temurin:25-jdk-alpine AS builder
 
 WORKDIR /app
 
@@ -33,7 +33,7 @@ RUN mvn clean package -DskipTests -B && \
 # ============================================
 # Runtime Stage
 # ============================================
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 
 LABEL org.opencontainers.image.title="Audit Trail Server"
 LABEL org.opencontainers.image.description="Universal audit logging system"
