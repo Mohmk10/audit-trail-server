@@ -1,0 +1,8 @@
+spring:
+  elasticsearch:
+    uris: http://localhost:9200
+
+logging:
+  level:
+    com.mohmk10.audittrail: DEBUG
+    org.springframework.data.elasticsearch: DEBUG
