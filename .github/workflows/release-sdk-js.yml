@@ -65,7 +65,8 @@ jobs:
         run: |
           cd audit-trail-sdk-js
           # Note: NPM_TOKEN must be an "Automation" token (not "Publish") if 2FA is enabled
-          npm publish --access public --provenance
+          # Provenance requires public repo, so we skip it for private repos
+          npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
