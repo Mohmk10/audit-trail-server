@@ -80,8 +80,9 @@ jobs:
       - name: Sign Artifacts
         run: |
           cd audit-trail-sdk-java/target
-          for file in *.jar *.pom 2>/dev/null; do
+          for file in *.jar *.pom; do
             if [ -f "$file" ]; then
+              echo "Signing $file"
               gpg --batch --yes --pinentry-mode loopback \
                   --passphrase "${{ secrets.GPG_PASSPHRASE }}" \
                   -ab "$file"
