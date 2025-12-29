@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.0.0] - 2025-01-XX
+## [1.0.0] - 2025-12-29
 
 ### Added
 
@@ -139,7 +139,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Highlights |
 |---------|------|------------|
-| 1.0.0 | 2025-01 | Initial release with full feature set |
+| 1.0.0 | 2025-12-29 | Initial release with full feature set |
 
 ---
 
