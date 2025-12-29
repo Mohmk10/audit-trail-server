@@ -48,14 +48,17 @@ jobs:
 
       - name: Create Maven Settings
         run: |
+          DECODED=$(echo "${{ secrets.SONATYPE_TOKEN_BASE64 }}" | base64 -d)
+          USERNAME=$(echo "$DECODED" | cut -d':' -f1)
+          PASSWORD=$(echo "$DECODED" | cut -d':' -f2)
           mkdir -p ~/.m2
-          cat > ~/.m2/settings.xml << 'EOF'
+          cat > ~/.m2/settings.xml << EOF
           <settings>
             <servers>
               <server>
                 <id>central</id>
-                <username>${{ secrets.MAVEN_CENTRAL_USERNAME }}</username>
-                <password>${{ secrets.MAVEN_CENTRAL_TOKEN }}</password>
+                <username>$USERNAME</username>
+                <password>$PASSWORD</password>
               </server>
             </servers>
           </settings>
@@ -66,4 +69,4 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           cd audit-trail-sdk-java
-          mvn clean deploy -Prelease -DskipTests -Dgpg.passphrase=$GPG_PASSPHRASE
+          mvn clean deploy -Prelease -DskipTests -Dgpg.passphrase="$GPG_PASSPHRASE"
