@@ -1,5 +1,8 @@
 # Elasticsearch Configuration
+# Disabled by default - Bonsai uses OpenSearch 2.x which is not compatible with ES 8 client
+# Set ELASTICSEARCH_ENABLED=true when using a compatible Elasticsearch 8 cluster
 elasticsearch:
+  enabled: ${ELASTICSEARCH_ENABLED:false}
   host: ${ELASTICSEARCH_HOST:localhost}
   port: ${ELASTICSEARCH_PORT:9200}
   username: ${ELASTICSEARCH_USERNAME:}

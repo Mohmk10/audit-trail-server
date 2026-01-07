@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import com.mohmk10.audittrail.core.domain.Action;
@@ -14,6 +15,7 @@ import com.mohmk10.audittrail.core.domain.Resource;
 import com.mohmk10.audittrail.search.adapter.out.elasticsearch.document.EventDocument;
 
 @Component
+@ConditionalOnProperty(name = "elasticsearch.enabled", havingValue = "true", matchIfMissing = false)
 public class EventDocumentMapper {
 
     public EventDocument toDocument(Event event) {

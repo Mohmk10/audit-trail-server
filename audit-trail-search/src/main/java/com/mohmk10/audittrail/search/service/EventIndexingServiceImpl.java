@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
@@ -15,6 +16,7 @@ import com.mohmk10.audittrail.search.adapter.out.elasticsearch.mapper.EventDocum
 import com.mohmk10.audittrail.search.adapter.out.elasticsearch.repository.ElasticsearchEventRepository;
 
 @Service
+@ConditionalOnProperty(name = "elasticsearch.enabled", havingValue = "true", matchIfMissing = false)
 public class EventIndexingServiceImpl implements EventIndexingService {
 
     private static final Logger log = LoggerFactory.getLogger(EventIndexingServiceImpl.class);
