@@ -12,29 +12,31 @@ import java.time.Duration;
 @EnableElasticsearchRepositories(basePackages = "com.mohmk10.audittrail.search.adapter.out.elasticsearch.repository")
 public class ElasticsearchConfig extends ElasticsearchConfiguration {
 
-    @Value("${spring.elasticsearch.uris:http://localhost:9200}")
-    private String elasticsearchUri;
+    @Value("${elasticsearch.host:localhost}")
+    private String host;
 
-    @Value("${spring.elasticsearch.username:}")
+    @Value("${elasticsearch.port:9200}")
+    private int port;
+
+    @Value("${elasticsearch.username:}")
     private String username;
 
-    @Value("${spring.elasticsearch.password:}")
+    @Value("${elasticsearch.password:}")
     private String password;
+
+    @Value("${elasticsearch.use-ssl:false}")
+    private boolean useSsl;
 
     @Override
     public ClientConfiguration clientConfiguration() {
-        String host = elasticsearchUri
-                .replace("http://", "")
-                .replace("https://", "")
-                .replaceAll("/.*$", "");
+        String hostAndPort = host + ":" + port;
 
-        boolean useSsl = elasticsearchUri.startsWith("https://");
         boolean hasCredentials = username != null && !username.isEmpty()
                 && password != null && !password.isEmpty();
 
         if (useSsl && hasCredentials) {
             return ClientConfiguration.builder()
-                    .connectedTo(host)
+                    .connectedTo(hostAndPort)
                     .usingSsl()
                     .withBasicAuth(username, password)
                     .withConnectTimeout(Duration.ofSeconds(10))
@@ -42,21 +44,21 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
                     .build();
         } else if (useSsl) {
             return ClientConfiguration.builder()
-                    .connectedTo(host)
+                    .connectedTo(hostAndPort)
                     .usingSsl()
                     .withConnectTimeout(Duration.ofSeconds(10))
                     .withSocketTimeout(Duration.ofSeconds(30))
                     .build();
         } else if (hasCredentials) {
             return ClientConfiguration.builder()
-                    .connectedTo(host)
+                    .connectedTo(hostAndPort)
                     .withBasicAuth(username, password)
                     .withConnectTimeout(Duration.ofSeconds(10))
                     .withSocketTimeout(Duration.ofSeconds(30))
                     .build();
         } else {
             return ClientConfiguration.builder()
-                    .connectedTo(host)
+                    .connectedTo(hostAndPort)
                     .withConnectTimeout(Duration.ofSeconds(10))
                     .withSocketTimeout(Duration.ofSeconds(30))
                     .build();

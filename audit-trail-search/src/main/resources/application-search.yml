@@ -1,9 +1,12 @@
-spring:
-  elasticsearch:
-    uris: ${SPRING_ELASTICSEARCH_URIS:http://localhost:9200}
-    username: ${SPRING_ELASTICSEARCH_USERNAME:}
-    password: ${SPRING_ELASTICSEARCH_PASSWORD:}
+# Elasticsearch Configuration
+elasticsearch:
+  host: ${ELASTICSEARCH_HOST:localhost}
+  port: ${ELASTICSEARCH_PORT:9200}
+  username: ${ELASTICSEARCH_USERNAME:}
+  password: ${ELASTICSEARCH_PASSWORD:}
+  use-ssl: ${ELASTICSEARCH_USE_SSL:false}
 
+# Search Index Configuration
 search:
   index:
     name: ${ELASTICSEARCH_INDEX_NAME:events}
