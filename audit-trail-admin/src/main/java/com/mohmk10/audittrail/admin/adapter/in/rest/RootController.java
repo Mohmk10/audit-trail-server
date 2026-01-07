@@ -1,4 +1,4 @@
-package com.mohmk10.audittrail.ingestion.adapter.in.rest;
+package com.mohmk10.audittrail.admin.adapter.in.rest;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,14 +7,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 @RestController
-public class HealthController {
+public class RootController {
 
     @GetMapping("/health")
-    public ResponseEntity<Map<String, String>> health() {
-        return ResponseEntity.ok(Map.of(
-                "status", "UP",
-                "service", "audit-trail-server"
-        ));
+    public ResponseEntity<Map<String, String>> simpleHealth() {
+        return ResponseEntity.ok(Map.of("status", "UP"));
     }
 
     @GetMapping("/")
