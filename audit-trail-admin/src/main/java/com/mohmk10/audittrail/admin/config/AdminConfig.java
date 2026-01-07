@@ -25,6 +25,12 @@ public class AdminConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
+                        // Health check and actuator endpoints - public for Render
+                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/actuator/health/**").permitAll()
+                        .requestMatchers("/health").permitAll()
+                        .requestMatchers("/").permitAll()
+                        // All API endpoints - public for now
                         .anyRequest().permitAll()
                 );
 
