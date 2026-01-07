@@ -1,9 +1,11 @@
 spring:
   elasticsearch:
-    uris: http://localhost:9200
+    uris: ${SPRING_ELASTICSEARCH_URIS:http://localhost:9200}
+    username: ${SPRING_ELASTICSEARCH_USERNAME:}
+    password: ${SPRING_ELASTICSEARCH_PASSWORD:}
 
 search:
   index:
-    name: events
-    shards: 1
-    replicas: 0
+    name: ${ELASTICSEARCH_INDEX_NAME:events}
+    shards: ${ELASTICSEARCH_INDEX_SHARDS:1}
+    replicas: ${ELASTICSEARCH_INDEX_REPLICAS:0}
