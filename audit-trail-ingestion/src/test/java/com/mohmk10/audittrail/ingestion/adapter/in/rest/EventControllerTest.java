@@ -17,6 +17,7 @@ import com.mohmk10.audittrail.ingestion.adapter.in.rest.dto.EventResponse;
 import com.mohmk10.audittrail.ingestion.adapter.in.rest.dto.ResourceRequest;
 import com.mohmk10.audittrail.ingestion.adapter.in.rest.mapper.EventRequestMapper;
 import com.mohmk10.audittrail.ingestion.service.EventIngestionService;
+import com.mohmk10.audittrail.search.service.EventSearchService;
 import com.mohmk10.audittrail.storage.service.ImmutableStorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,13 +47,16 @@ class EventControllerTest {
     private ImmutableStorageService immutableStorageService;
 
     @Mock
+    private EventSearchService eventSearchService;
+
+    @Mock
     private EventRequestMapper eventRequestMapper;
 
     private EventController controller;
 
     @BeforeEach
     void setUp() {
-        controller = new EventController(eventIngestionService, immutableStorageService, eventRequestMapper);
+        controller = new EventController(eventIngestionService, immutableStorageService, eventSearchService, eventRequestMapper);
     }
 
     private EventRequest createValidEventRequest() {
