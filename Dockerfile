@@ -63,11 +63,14 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 # Expose port (Render uses PORT env variable)
 EXPOSE 8080
 
-# JVM options optimized for containers and Render free tier (512MB RAM)
-ENV JAVA_OPTS="-XX:+UseContainerSupport \
-    -XX:MaxRAMPercentage=75.0 \
-    -XX:+UseG1GC \
-    -XX:+UseStringDeduplication \
+# JVM options optimized for Render free tier (512MB RAM limit)
+ENV JAVA_OPTS="-XX:+UseSerialGC \
+    -XX:MaxRAM=400m \
+    -XX:MaxMetaspaceSize=100m \
+    -Xms128m \
+    -Xmx300m \
+    -XX:+TieredCompilation \
+    -XX:TieredStopAtLevel=1 \
     -Djava.security.egd=file:/dev/./urandom"
 
 # Run application with Render's PORT variable
