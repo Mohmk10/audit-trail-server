@@ -1,0 +1,44 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+*.iml
+.vscode
+.settings
+.project
+.classpath
+
+# Build artifacts (keep pom.xml for build)
+**/target/
+!**/pom.xml
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation (not needed for build)
+docs/
+
+# SDKs (not needed for server)
+audit-trail-sdk-go/
+audit-trail-sdk-js/
+audit-trail-sdk-python/
+
+# Helm charts
+helm/
+
+# Scripts
+scripts/
+
+# Docker (avoid recursive copy)
+docker/
+docker-compose.yml
+
+# Claude
+.claude/
