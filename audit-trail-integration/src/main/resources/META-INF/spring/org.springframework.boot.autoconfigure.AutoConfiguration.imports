@@ -1,3 +1,3 @@
 com.mohmk10.audittrail.integration.config.WebhookAutoConfiguration
 com.mohmk10.audittrail.integration.config.ExporterAutoConfiguration
-com.mohmk10.audittrail.integration.kafka.KafkaConfig
+com.mohmk10.audittrail.integration.rabbitmq.RabbitMQConfig

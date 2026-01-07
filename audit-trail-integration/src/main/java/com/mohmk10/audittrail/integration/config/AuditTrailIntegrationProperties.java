@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class AuditTrailIntegrationProperties {
 
     private Webhook webhook = new Webhook();
-    private Kafka kafka = new Kafka();
+    private RabbitMQ rabbitmq = new RabbitMQ();
     private Exporter exporter = new Exporter();
 
     public Webhook getWebhook() {
@@ -17,12 +17,12 @@ public class AuditTrailIntegrationProperties {
         this.webhook = webhook;
     }
 
-    public Kafka getKafka() {
-        return kafka;
+    public RabbitMQ getRabbitmq() {
+        return rabbitmq;
     }
 
-    public void setKafka(Kafka kafka) {
-        this.kafka = kafka;
+    public void setRabbitmq(RabbitMQ rabbitmq) {
+        this.rabbitmq = rabbitmq;
     }
 
     public Exporter getExporter() {
@@ -72,11 +72,11 @@ public class AuditTrailIntegrationProperties {
         }
     }
 
-    public static class Kafka {
+    public static class RabbitMQ {
         private boolean enabled = false;
-        private String topic = "audit-events";
-        private Consumer consumer = new Consumer();
-        private Producer producer = new Producer();
+        private Queue queue = new Queue();
+        private Exchange exchange = new Exchange();
+        private RoutingKey routingKey = new RoutingKey();
 
         public boolean isEnabled() {
             return enabled;
@@ -86,78 +86,63 @@ public class AuditTrailIntegrationProperties {
             this.enabled = enabled;
         }
 
-        public String getTopic() {
-            return topic;
+        public Queue getQueue() {
+            return queue;
         }
 
-        public void setTopic(String topic) {
-            this.topic = topic;
+        public void setQueue(Queue queue) {
+            this.queue = queue;
         }
 
-        public Consumer getConsumer() {
-            return consumer;
+        public Exchange getExchange() {
+            return exchange;
         }
 
-        public void setConsumer(Consumer consumer) {
-            this.consumer = consumer;
+        public void setExchange(Exchange exchange) {
+            this.exchange = exchange;
         }
 
-        public Producer getProducer() {
-            return producer;
+        public RoutingKey getRoutingKey() {
+            return routingKey;
         }
 
-        public void setProducer(Producer producer) {
-            this.producer = producer;
+        public void setRoutingKey(RoutingKey routingKey) {
+            this.routingKey = routingKey;
         }
 
-        public static class Consumer {
-            private String groupId = "audit-trail-group";
-            private String autoOffsetReset = "earliest";
-            private int maxPollRecords = 500;
+        public static class Queue {
+            private String events = "audit-events-queue";
 
-            public String getGroupId() {
-                return groupId;
+            public String getEvents() {
+                return events;
             }
 
-            public void setGroupId(String groupId) {
-                this.groupId = groupId;
-            }
-
-            public String getAutoOffsetReset() {
-                return autoOffsetReset;
-            }
-
-            public void setAutoOffsetReset(String autoOffsetReset) {
-                this.autoOffsetReset = autoOffsetReset;
-            }
-
-            public int getMaxPollRecords() {
-                return maxPollRecords;
-            }
-
-            public void setMaxPollRecords(int maxPollRecords) {
-                this.maxPollRecords = maxPollRecords;
+            public void setEvents(String events) {
+                this.events = events;
             }
         }
 
-        public static class Producer {
-            private String acks = "all";
-            private int retries = 3;
+        public static class Exchange {
+            private String events = "audit-events-exchange";
 
-            public String getAcks() {
-                return acks;
+            public String getEvents() {
+                return events;
             }
 
-            public void setAcks(String acks) {
-                this.acks = acks;
+            public void setEvents(String events) {
+                this.events = events;
+            }
+        }
+
+        public static class RoutingKey {
+            private String events = "audit.events";
+
+            public String getEvents() {
+                return events;
             }
 
-            public int getRetries() {
-                return retries;
-            }
-
-            public void setRetries(int retries) {
-                this.retries = retries;
+            public void setEvents(String events) {
+                this.events = events;
             }
         }
     }
