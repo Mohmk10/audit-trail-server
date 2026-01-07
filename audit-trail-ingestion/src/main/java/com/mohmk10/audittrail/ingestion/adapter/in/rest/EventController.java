@@ -1,6 +1,9 @@
 package com.mohmk10.audittrail.ingestion.adapter.in.rest;
 
 import com.mohmk10.audittrail.core.domain.Event;
+import com.mohmk10.audittrail.core.dto.SearchCriteria;
+import com.mohmk10.audittrail.core.dto.SearchResult;
+import com.mohmk10.audittrail.core.dto.DateRange;
 import com.mohmk10.audittrail.core.exception.EventNotFoundException;
 import com.mohmk10.audittrail.ingestion.adapter.in.rest.dto.BatchEventRequest;
 import com.mohmk10.audittrail.ingestion.adapter.in.rest.dto.BatchEventResponse;
@@ -8,17 +11,15 @@ import com.mohmk10.audittrail.ingestion.adapter.in.rest.dto.EventRequest;
 import com.mohmk10.audittrail.ingestion.adapter.in.rest.dto.EventResponse;
 import com.mohmk10.audittrail.ingestion.adapter.in.rest.mapper.EventRequestMapper;
 import com.mohmk10.audittrail.ingestion.service.EventIngestionService;
+import com.mohmk10.audittrail.search.service.EventSearchService;
 import com.mohmk10.audittrail.storage.service.ImmutableStorageService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.Instant;
 import java.util.UUID;
 
 @RestController
@@ -28,15 +29,52 @@ public class EventController {
 
     private final EventIngestionService eventIngestionService;
     private final ImmutableStorageService immutableStorageService;
+    private final EventSearchService eventSearchService;
     private final EventRequestMapper eventRequestMapper;
 
     public EventController(
             EventIngestionService eventIngestionService,
             ImmutableStorageService immutableStorageService,
+            EventSearchService eventSearchService,
             EventRequestMapper eventRequestMapper) {
         this.eventIngestionService = eventIngestionService;
         this.immutableStorageService = immutableStorageService;
+        this.eventSearchService = eventSearchService;
         this.eventRequestMapper = eventRequestMapper;
+    }
+
+    @GetMapping
+    public ResponseEntity<SearchResult<Event>> getEvents(
+            @RequestParam(required = false) String tenantId,
+            @RequestHeader(value = "X-Tenant-ID", required = false) String headerTenantId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) Instant from,
+            @RequestParam(required = false) Instant to,
+            @RequestParam(required = false) String actorId,
+            @RequestParam(required = false) String query
+    ) {
+        String effectiveTenantId = tenantId != null ? tenantId : headerTenantId;
+        if (effectiveTenantId == null || effectiveTenantId.isBlank()) {
+            effectiveTenantId = "production";
+        }
+
+        DateRange dateRange = null;
+        if (from != null || to != null) {
+            dateRange = new DateRange(from, to);
+        }
+
+        SearchCriteria criteria = SearchCriteria.builder()
+                .tenantId(effectiveTenantId)
+                .actorId(actorId)
+                .dateRange(dateRange)
+                .query(query)
+                .page(page)
+                .size(size)
+                .build();
+
+        SearchResult<Event> result = eventSearchService.search(criteria);
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping

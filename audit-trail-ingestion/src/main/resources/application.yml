@@ -81,3 +81,8 @@ reporting:
     max-size-mb: 100
   expiration:
     days: 30
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:eV08tcR4FaJPbmkQhAl1hISsNIkre1zJTK1abuZa9cQ=}
+  expiration: ${JWT_EXPIRATION:86400}

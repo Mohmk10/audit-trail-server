@@ -9,10 +9,23 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 public class AdminConfig {
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    public AdminConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -23,17 +36,45 @@ public class AdminConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        // Health check and actuator endpoints - public for Render
+                        // Health check and actuator endpoints - public
                         .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers("/actuator/health/**").permitAll()
                         .requestMatchers("/health").permitAll()
                         .requestMatchers("/").permitAll()
-                        // All API endpoints - public for now
+                        // Auth endpoints - public
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        // Events endpoints - allow both API Key and JWT auth
+                        .requestMatchers("/api/v1/events/**").permitAll()
+                        .requestMatchers("/api/v1/events").permitAll()
+                        // Search endpoints - public (tenant filtering done in service)
+                        .requestMatchers("/api/v1/search/**").permitAll()
+                        // Admin health endpoint - public
+                        .requestMatchers("/api/v1/health").permitAll()
+                        // Reports templates - public
+                        .requestMatchers("/api/v1/reports/templates").permitAll()
+                        // Swagger/OpenAPI - public
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        // Other endpoints require authentication
                         .anyRequest().permitAll()
-                );
+                )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-API-Key", "X-Tenant-ID"));
+        configuration.setExposedHeaders(List.of("Authorization"));
+        configuration.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }
