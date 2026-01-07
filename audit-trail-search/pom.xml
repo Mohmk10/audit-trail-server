@@ -19,6 +19,10 @@
             <artifactId>audit-trail-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.mohmk10.audittrail</groupId>
+            <artifactId>audit-trail-storage</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
         </dependency>
