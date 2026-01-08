@@ -6,6 +6,7 @@ import com.mohmk10.audittrail.admin.service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -23,7 +24,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     @Value("${app.oauth2.authorized-redirect-uri:https://audit-trail-dashboard.vercel.app/auth/oauth-callback}")
     private String redirectUri;
 
-    public OAuth2SuccessHandler(AuthService authService, JwtService jwtService) {
+    public OAuth2SuccessHandler(@Lazy AuthService authService, JwtService jwtService) {
         this.authService = authService;
         this.jwtService = jwtService;
     }
