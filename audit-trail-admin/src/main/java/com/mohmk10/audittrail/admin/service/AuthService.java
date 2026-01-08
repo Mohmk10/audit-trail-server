@@ -14,6 +14,8 @@ import com.mohmk10.audittrail.admin.domain.TenantPlan;
 import com.mohmk10.audittrail.admin.domain.TenantStatus;
 import com.mohmk10.audittrail.admin.domain.User;
 import com.mohmk10.audittrail.admin.domain.UserStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,8 @@ import java.util.UUID;
 
 @Service
 public class AuthService {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
     private final UserRepository userRepository;
     private final TenantRepository tenantRepository;
@@ -145,19 +149,25 @@ public class AuthService {
 
     @Transactional
     public User findOrCreateOAuthUser(String email, String name, String provider, String providerId) {
+        log.info("findOrCreateOAuthUser: email={}, name={}, provider={}, providerId={}", email, name, provider, providerId);
+
         return userRepository.findByEmail(email)
                 .map(existingEntity -> {
+                    log.info("Found existing user by email: {}", existingEntity.getId());
                     if (existingEntity.getOauthProvider() == null) {
+                        log.info("Linking OAuth to existing account");
                         existingEntity.setOauthProvider(provider);
                         existingEntity.setOauthId(providerId);
-                        existingEntity.setLastLoginAt(Instant.now());
-                        return userMapper.toDomain(userRepository.save(existingEntity));
                     }
                     existingEntity.setLastLoginAt(Instant.now());
-                    return userMapper.toDomain(userRepository.save(existingEntity));
+                    UserEntity saved = userRepository.save(existingEntity);
+                    log.info("User updated successfully");
+                    return userMapper.toDomain(saved);
                 })
                 .orElseGet(() -> {
+                    log.info("Creating new OAuth user");
                     TenantEntity tenant = createDefaultTenant(name);
+                    log.info("Created tenant with slug: {}", tenant.getSlug());
 
                     String[] nameParts = name != null ? name.trim().split("\\s+", 2) : new String[]{email.split("@")[0]};
                     String firstName = nameParts[0];
@@ -178,8 +188,11 @@ public class AuthService {
                             .lastLoginAt(Instant.now())
                             .build();
 
+                    log.info("Saving new user with ID: {}", user.getId());
                     UserEntity entity = userMapper.toEntity(user);
-                    return userMapper.toDomain(userRepository.save(entity));
+                    UserEntity saved = userRepository.save(entity);
+                    log.info("User saved successfully: {}", saved.getId());
+                    return userMapper.toDomain(saved);
                 });
     }
 

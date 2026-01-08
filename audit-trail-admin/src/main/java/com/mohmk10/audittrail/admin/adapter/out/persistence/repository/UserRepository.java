@@ -19,6 +19,8 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
 
     Optional<UserEntity> findByEmail(String email);
 
+    Optional<UserEntity> findByOauthProviderAndOauthId(String oauthProvider, String oauthId);
+
     boolean existsByEmail(String email);
 
     Page<UserEntity> findByTenantId(String tenantId, Pageable pageable);
