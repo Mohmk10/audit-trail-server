@@ -1,6 +1,22 @@
 spring:
   application:
     name: audit-trail-server
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - email
+              - profile
+          github:
+            client-id: ${GITHUB_CLIENT_ID}
+            client-secret: ${GITHUB_CLIENT_SECRET}
+            scope:
+              - user:email
+              - read:user
   # Memory optimization
   main:
     lazy-initialization: true
@@ -86,3 +102,8 @@ reporting:
 jwt:
   secret: ${JWT_SECRET:eV08tcR4FaJPbmkQhAl1hISsNIkre1zJTK1abuZa9cQ=}
   expiration: ${JWT_EXPIRATION:86400}
+
+# OAuth2 Configuration
+app:
+  oauth2:
+    authorized-redirect-uri: ${FRONTEND_URL:https://audit-trail-dashboard.vercel.app}/auth/oauth-callback

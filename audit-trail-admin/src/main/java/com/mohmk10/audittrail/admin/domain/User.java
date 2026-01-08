@@ -16,6 +16,8 @@ public class User {
     private Instant updatedAt;
     private Instant lastLoginAt;
     private String lastLoginIp;
+    private String oauthProvider;
+    private String oauthId;
 
     public User() {
     }
@@ -33,6 +35,8 @@ public class User {
         this.updatedAt = builder.updatedAt;
         this.lastLoginAt = builder.lastLoginAt;
         this.lastLoginIp = builder.lastLoginIp;
+        this.oauthProvider = builder.oauthProvider;
+        this.oauthId = builder.oauthId;
     }
 
     public static Builder builder() {
@@ -135,6 +139,22 @@ public class User {
         this.lastLoginIp = lastLoginIp;
     }
 
+    public String getOauthProvider() {
+        return oauthProvider;
+    }
+
+    public void setOauthProvider(String oauthProvider) {
+        this.oauthProvider = oauthProvider;
+    }
+
+    public String getOauthId() {
+        return oauthId;
+    }
+
+    public void setOauthId(String oauthId) {
+        this.oauthId = oauthId;
+    }
+
     public String getFullName() {
         if (firstName == null && lastName == null) {
             return email;
@@ -155,6 +175,8 @@ public class User {
         private Instant updatedAt;
         private Instant lastLoginAt;
         private String lastLoginIp;
+        private String oauthProvider;
+        private String oauthId;
 
         public Builder id(UUID id) {
             this.id = id;
@@ -213,6 +235,16 @@ public class User {
 
         public Builder lastLoginIp(String lastLoginIp) {
             this.lastLoginIp = lastLoginIp;
+            return this;
+        }
+
+        public Builder oauthProvider(String oauthProvider) {
+            this.oauthProvider = oauthProvider;
+            return this;
+        }
+
+        public Builder oauthId(String oauthId) {
+            this.oauthId = oauthId;
             return this;
         }
 

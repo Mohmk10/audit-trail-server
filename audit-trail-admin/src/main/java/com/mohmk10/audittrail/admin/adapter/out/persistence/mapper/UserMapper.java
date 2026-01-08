@@ -25,6 +25,8 @@ public class UserMapper {
                 .updatedAt(entity.getUpdatedAt())
                 .lastLoginAt(entity.getLastLoginAt())
                 .lastLoginIp(entity.getLastLoginIp())
+                .oauthProvider(entity.getOauthProvider())
+                .oauthId(entity.getOauthId())
                 .build();
     }
 
@@ -46,6 +48,8 @@ public class UserMapper {
         entity.setUpdatedAt(domain.getUpdatedAt());
         entity.setLastLoginAt(domain.getLastLoginAt());
         entity.setLastLoginIp(domain.getLastLoginIp());
+        entity.setOauthProvider(domain.getOauthProvider());
+        entity.setOauthId(domain.getOauthId());
         return entity;
     }
 
@@ -57,5 +61,7 @@ public class UserMapper {
         entity.setStatus(domain.getStatus());
         entity.setLastLoginAt(domain.getLastLoginAt());
         entity.setLastLoginIp(domain.getLastLoginIp());
+        entity.setOauthProvider(domain.getOauthProvider());
+        entity.setOauthId(domain.getOauthId());
     }
 }

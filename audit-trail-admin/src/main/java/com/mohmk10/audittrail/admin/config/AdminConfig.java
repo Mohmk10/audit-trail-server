@@ -22,9 +22,11 @@ import java.util.List;
 public class AdminConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
-    public AdminConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public AdminConfig(JwtAuthenticationFilter jwtAuthenticationFilter, OAuth2SuccessHandler oAuth2SuccessHandler) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
     }
 
     @Bean
@@ -45,6 +47,8 @@ public class AdminConfig {
                         .requestMatchers("/").permitAll()
                         // Auth endpoints - public
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        // OAuth2 endpoints - public
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         // Events endpoints - allow both API Key and JWT auth
                         .requestMatchers("/api/v1/events/**").permitAll()
                         .requestMatchers("/api/v1/events").permitAll()
@@ -59,6 +63,9 @@ public class AdminConfig {
                         // Other endpoints require authentication
                         .anyRequest().permitAll()
                 )
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(oAuth2SuccessHandler)
+                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -67,10 +74,15 @@ public class AdminConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("*"));
+        configuration.setAllowedOrigins(Arrays.asList(
+                "https://audit-trail-dashboard.vercel.app",
+                "http://localhost:4200",
+                "http://localhost:3000"
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-API-Key", "X-Tenant-ID"));
         configuration.setExposedHeaders(List.of("Authorization"));
+        configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

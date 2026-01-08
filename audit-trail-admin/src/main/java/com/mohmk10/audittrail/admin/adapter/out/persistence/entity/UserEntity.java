@@ -53,6 +53,12 @@ public class UserEntity {
     @Column(name = "last_login_ip")
     private String lastLoginIp;
 
+    @Column(name = "oauth_provider")
+    private String oauthProvider;
+
+    @Column(name = "oauth_id")
+    private String oauthId;
+
     public UUID getId() {
         return id;
     }
@@ -147,6 +153,22 @@ public class UserEntity {
 
     public void setLastLoginIp(String lastLoginIp) {
         this.lastLoginIp = lastLoginIp;
+    }
+
+    public String getOauthProvider() {
+        return oauthProvider;
+    }
+
+    public void setOauthProvider(String oauthProvider) {
+        this.oauthProvider = oauthProvider;
+    }
+
+    public String getOauthId() {
+        return oauthId;
+    }
+
+    public void setOauthId(String oauthId) {
+        this.oauthId = oauthId;
     }
 
     @PrePersist
