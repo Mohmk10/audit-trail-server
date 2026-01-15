@@ -1,7 +1,7 @@
 # ============================================
 # Development Dockerfile
 # ============================================
-FROM eclipse-temurin:21-jdk-alpine
+FROM eclipse-temurin:25-jdk-alpine
 
 LABEL org.opencontainers.image.title="Audit Trail Server (Dev)"
 LABEL org.opencontainers.image.description="Development image with hot reload"
